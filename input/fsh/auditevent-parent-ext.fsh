@@ -1,15 +1,15 @@
 Alias: $AEAltId = http://hl7.org/fhir/StructureDefinition/auditevent-AlternativeUserID
 Alias: $AEOnBehalf = http://hl7.org/fhir/StructureDefinition/auditevent-OnBehalfOf
 
-Profile: MyParentAuditEventProfile
+Profile: MyParentAuditEventProfileWithExtension
 Parent: AuditEvent
-// empty profile
+* agent.extension contains $AEOnBehalf named onbehalf 0..*
 
-Profile: MyAuditEventProfile
-Parent: MyParentAuditEventProfile
+Profile: MyAuditEventProfileWithParentExtension
+Parent: MyParentAuditEventProfileWithExtension
 Description: "An example reproducing an issue with reslicing extensions."
 // agent can have 0..* auditevent-AlternativeUserID extensions.
-* agent.extension contains $AEAltId named altid 0..* and $AEOnBehalf named onbehalf 0..*
+* agent.extension contains $AEAltId named altid 0..*
 // Slice the auditevent-AlternativeUserID extensions by their identifier system.
 // Since we're already in a slice, this is setting up re-slicing rules.
 // We know there is already a discriminator on url / #value, so start at index 1.
@@ -22,8 +22,8 @@ Description: "An example reproducing an issue with reslicing extensions."
 * agent.extension[altid][ssn].valueIdentifier.system 1..1
 * agent.extension[altid][ssn].valueIdentifier.system = "http://hl7.org/fhir/sid/us-ssn"
 
-Instance: MyAuditEventInstance
-InstanceOf: MyAuditEventProfile
+Instance: MyAuditEventInstanceWithParentProfileExtension
+InstanceOf: MyAuditEventProfileWithParentExtension
 Title: "My Audit Event Instance"
 Description: "An instance of an audit even reproducing an issue with resclicing extensions"
 * code = http://dicom.nema.org/resources/ontology/DCM#110122 "Login"
@@ -32,9 +32,3 @@ Description: "An instance of an audit even reproducing an issue with resclicing 
 * agent.extension[altid][npi].valueIdentifier.value = "12345"
 * agent.extension[altid][ssn].valueIdentifier.value = "67890"
 * source.observer = Reference(Bob)
-
-Instance: Bob
-InstanceOf: Patient
-Title: "Bob"
-Description: "It's Bob!"
-* name.given = "Bob"
